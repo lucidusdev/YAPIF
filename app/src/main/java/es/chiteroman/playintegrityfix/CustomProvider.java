@@ -2,22 +2,22 @@ package es.chiteroman.playintegrityfix;
 
 import java.security.Provider;
 
-public final class CustomProvider extends Provider {
+public class CustomProvider extends Provider {
 
-    public CustomProvider(Provider provider) {
+    protected CustomProvider(Provider provider) {
         super(provider.getName(), provider.getVersion(), provider.getInfo());
 
         putAll(provider);
+
+        remove("KeyStore.AndroidKeyStore");
 
         put("KeyStore.AndroidKeyStore", CustomKeyStoreSpi.class.getName());
     }
 
     @Override
     public synchronized Service getService(String type, String algorithm) {
-        EntryPoint.LOG(String.format("[Service] Type: '%s' | Algorithm: '%s'", type, algorithm));
-
-        if ("KeyStore".equals(type)) EntryPoint.spoofDevice();
-
+        EntryPoint.LOG3("[SERVICE] Type: " + type + " | Algorithm: " + algorithm);
+        //EntryPoint.spoofDevice();
         return super.getService(type, algorithm);
     }
 }

@@ -1,4 +1,4 @@
-# Yet Another Play Integrity Fix
+# Play Integrity Fix
 
 This module attempts to fix Play Integrity verdicts to get a certified device on bootloader unlocked devices.
 

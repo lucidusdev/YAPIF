@@ -10,49 +10,43 @@ if [ -d /data/adb/modules/safetynet-fix ]; then
     ui_print "! safetynet-fix module will be removed. Do NOT install it again along PIF."
 fi
 
-# MagiskHidePropsConf module is obsolete in Android 8+ but it shouldn't give issues.
-if [ -d /data/adb/modules/MagiskHidePropsConf ]; then
-    ui_print "! WARNING, MagiskHidePropsConf module may cause issues with PIF."
-fi
 
-# Remove xiaomi.eu apps
+# Disable MagiskHidePropsConf and PlayIntergrityFix
+M="MagiskHidePropsConf PlayIntegrityFix"
+for in $M; do
+	if [ -d /data/adb/modules/$i ]; then
+		ui_print "! Disable $i !"
+		touch /data/adb/modules/$i/disable
+	fi
+done
 
-if [ -d "/product/app/XiaomiEUInject" ]; then
-	
-	directory="$MODPATH/product/app/XiaomiEUInject"
 
-	[ -d "$directory" ] || mkdir -p "$directory"
+# Remove various 3rd party apps, these will restore upon removal YAPIF.
+APPS="/product/app/XiaomiEUInject /system/app/XInjectModule /system/app/EliteDevelopmentModule"
 
-	touch "$directory/.replace"
-		
-	ui_print "- XiaomiEUInject app removed."
-fi
+for i in $APPS; do
+	if [ -d $i ]; then
+		app=$(echo $i | cut -d '/' -f4)
+		directory="$MODPATH$i"
+		[ -d "$directory" ] || mkdir -p "$directory"
+		touch "$directory/.replace"
+		ui_print "- Remove $app at $i"
+	fi
+done
 
-# Remove EliteRoms app
-	
-if [ -d "/system/app/XInjectModule" ]; then
-	
-	directory="$MODPATH/system/app/XInjectModule"
+# Keep old config files
+PIFBASE=/data/adb/modules/yapif/
+F=$(cat $PIFBASE/yapif.ini | grep PROP_FILES | cut -d '=' -f2 | sed 's/,/ /g')
 
-	[ -d "$directory" ] || mkdir -p "$directory"
+for i in $F yapif.ini; do
+	if [ -f $PIFBASE/$i ]; then
+		ui_print "- Keeping $i"
+		cp -af $PIFBASE/$i $MODPATH/$i
+	fi
+done
 
-	touch "$directory/.replace"
-		
-	ui_print "- XInjectModule app removed."
-fi
 
-if [ -d "/system/app/EliteDevelopmentModule" ]; then
-	
-	directory="$MODPATH/system/app/EliteDevelopmentModule"
-
-	[ -d "$directory" ] || mkdir -p "$directory"
-
-	touch "$directory/.replace"
-		
-	ui_print "- EliteDevelopmentModule app removed."
-fi
-
-if [ -f "/data/adb/pif.json" ]; then
-	mv -f "/data/adb/pif.json" "/data/adb/pif.json.old"
-	ui_print "- Backup pif.json"
-fi
+ui_print "- Prepare system_properties"
+mv -f $MODPATH/bin/$ABI/system_properties $MODPATH/
+rm -rf $MODPATH/bin
+set_perm $MODPATH/system_properties root root 755

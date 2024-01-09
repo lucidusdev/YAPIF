@@ -23,8 +23,8 @@ android {
         applicationId = "es.chiteroman.playintegrityfix"
         minSdk = 26
         targetSdk = 34
-        versionCode = 15200
-        versionName = "v15.2"
+        versionCode = 200
+        versionName = "v2.0"
 
         externalNativeBuild {
             cmake {
@@ -62,10 +62,6 @@ android {
             version = "3.22.1"
         }
     }
-}
-
-dependencies {
-    implementation("dev.rikka.ndk.thirdparty:cxx:1.2.0")
 }
 
 tasks.register("updateModuleProp") {
@@ -106,7 +102,7 @@ tasks.register("copyFiles") {
 tasks.register<Zip>("zip") {
     dependsOn("copyFiles")
 
-    archiveFileName.set("PlayIntegrityFix_${project.android.defaultConfig.versionName}.zip")
+    archiveFileName.set("YAPIF_${project.android.defaultConfig.versionName}.zip")
     destinationDirectory.set(project.rootDir.resolve("out"))
 
     from(project.rootDir.resolve("module"))

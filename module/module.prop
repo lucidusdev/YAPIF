@@ -1,7 +1,8 @@
-id=playintegrityfix
-name=Play Integrity Fix
-version=v15.2
-versionCode=15200
-author=chiteroman
-description=Universal modular fix for Play Integrity (and SafetyNet) on devices running Android 8+.
-updateJson=https://raw.githubusercontent.com/chiteroman/PlayIntegrityFix/main/update.json
+id=yapif
+name=Yet Aother Play Integrity Fix
+version=v2.0
+versionCode=200
+author=lucidusdev
+originalauthor=chiteroman osm0sis
+description=Play Intergrity Fix with customization options, based on PIF module from chiteroman & osm0sis.
+updateJson=https://raw.githubusercontent.com/lucidusdev/main/update.json
