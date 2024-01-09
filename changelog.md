@@ -1,12 +1,7 @@
-We have a Telegram channel!
-If you want to share your knowledge join:
-https://t.me/playintegrityfix
+### v2.0
 
-# v15.1
+Initial release. 
 
-Emergency update 🚨
+Check yapif.ini for more options.
 
-- Fix few bugs.
-- Using v14.6 fingerprint, so you can pass DEVICE.
-
-MODULE WON'T PROVIDE MORE FINGERPRINTS WHEN GOOGLE BAN THIS ONE.
+No fingerprint provided! Please find use your own.

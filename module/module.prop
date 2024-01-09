@@ -1,8 +1,8 @@
 id=yapif
-name=Yet Aother Play Integrity Fix
+name=Yet Another Play Integrity Fix
 version=v2.0
 versionCode=200
 author=lucidusdev
 originalauthor=chiteroman osm0sis
-description=Play Intergrity Fix with customization options, based on PIF module from chiteroman & osm0sis.
-updateJson=https://raw.githubusercontent.com/lucidusdev/main/update.json
+description=Play Intergrity Fix with customization options, based on PIF modules from chiteroman & osm0sis.
+updateJson=https://raw.githubusercontent.com/lucidusdev/YAPIF/dev/update.json

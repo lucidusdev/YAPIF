@@ -1,6 +1,6 @@
 {
     "version": "v2.0",
     "versionCode": 200,
-    "zipUrl": "https://github.com/lucidusdev/YAPIF/releases/download/v2.0/YAPIF.zip",
+    "zipUrl": "https://github.com/lucidusdev/YAPIF/releases/download/v2.0/YAPIF_release.zip",
     "changelog": "https://raw.githubusercontent.com/lucidusdev/YAPIF/dev/changelog.md"
 }

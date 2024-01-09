@@ -13,7 +13,7 @@ fi
 
 # Disable MagiskHidePropsConf and PlayIntergrityFix
 M="MagiskHidePropsConf PlayIntegrityFix"
-for in $M; do
+for i in $M; do
 	if [ -d /data/adb/modules/$i ]; then
 		ui_print "! Disable $i !"
 		touch /data/adb/modules/$i/disable

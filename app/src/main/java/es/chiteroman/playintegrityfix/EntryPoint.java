@@ -1,3 +1,14 @@
+/***
+ * CREDIT
+ * Most of the code below is from PlayIntegrityFork repo(https://github.com/osm0sis/PlayIntegrityFork)
+ * With some minor tweaks.
+ * 
+ * Note:
+ * Properly set FIRST_SDK_INT for Android R(11) and older devices.
+ * Both FIRST_SDK_INT and DEVICE_INITIAL_SDK_INT, which response to FIRST_API_LEVEL, 
+ * are currently unused in DroidGuard, so it's a futureproofing.
+ * 
+ */
 package es.chiteroman.playintegrityfix;
 
 import android.os.Build;

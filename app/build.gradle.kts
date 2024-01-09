@@ -102,7 +102,8 @@ tasks.register("copyFiles") {
 tasks.register<Zip>("zip") {
     dependsOn("copyFiles")
 
-    archiveFileName.set("YAPIF_${project.android.defaultConfig.versionName}.zip")
+    //archiveFileName.set("YAPIF_${project.android.defaultConfig.versionName}.zip")
+	archiveFileName.set("YAPIF_release.zip")
     destinationDirectory.set(project.rootDir.resolve("out"))
 
     from(project.rootDir.resolve("module"))

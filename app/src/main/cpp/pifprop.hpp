@@ -1,4 +1,7 @@
-/*
+/***
+ * A prop/json/ini file parser for YAPIF(Yet Another Play Integrity Fix) Project.
+ * 
+ * ******************************************************* 
  * PIFProp::prop
  * A simple prop file parser class for Play Integrity Fix Module
  * For prop file, it can be in java .prop or flat(non-nested) json format.
@@ -17,18 +20,19 @@
  *      PROP1 : Value1
  *      PROP2 = Value 2
  * 
- * KNOW ISSUE:
+ * KNOWN ISSUES:
  * - can't handle escape chars
  * - prop key/value ending with '"' ',' will get trimmed
- * - each key/value, including { } must be in separated line
+ * - each key/value, must be in separated line
  *
- *
+ * *******************************************************
  *
  * PIFProp::ini
  * A simple ini config file parser for yapif.ini.
  * Values can be accessed  via ini.get(section, key, defaultvalue)
  * Any line starts with ";", "#" is comment.
  *
+ * 
  * by lucidusdev
  *
  */
@@ -45,7 +49,12 @@ namespace PIFProp {
 
     const std::string WHITESPACE = " \t\n\r\f\v\",";
 
-    //append file content to end of vector<char>
+    /// <summary>
+    /// Load file by fd, add binary content to the end of std::vector<char>
+    /// </summary>
+    /// <param name="fd">file descriptor, from open()</param>
+    /// <param name="data">vector<char> for file content</param>
+    /// <returns>count of bytes loaded</returns>    
     long appendLoad(int fd, std::vector<char>& data)
     {
         auto oldSize = data.size();
@@ -59,6 +68,12 @@ namespace PIFProp {
         return static_cast<long>(data.size()) - static_cast<long>(oldSize);
     };
 
+    /// <summary>
+    /// Load file by path, add binary content to the end of std::vector<char>
+    /// </summary>
+    /// <param name="path">File name</param>
+    /// <param name="data">vector<char> for file content</param>
+    /// <returns>count of bytes loaded</returns>
     long appendLoad(const std::string& path, std::vector<char>& data)
     {
         int fd = open(path.c_str(), O_RDONLY);
@@ -70,8 +85,13 @@ namespace PIFProp {
         return ret;
     };
 
-
-
+    /// <summary>
+    /// Remove white space from left, right side of string and return trimed string.
+    /// </summary>
+    /// <param name="str">String to be trimed</param>
+    /// <param name="trimVal">For split function to control trim</param>
+    /// <param name="whitespace">white space chars to be removed</param>
+    /// <returns>trimed string</returns>
     std::string trim_copy(const std::string& str, bool trimVal = true, const std::string& whitespace = WHITESPACE)
     {
         if (!trimVal)

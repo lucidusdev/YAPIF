@@ -1,3 +1,16 @@
+/***
+ * CREDIT
+ * Original code is from PlayIntegrityFix(https://github.com/chiteroman/PlayIntegrityFix)
+ * With modifications by lucidusdev to support:
+ * - .prop/.json fingerprint definition file.
+ * - Customization through yapif.ini.
+ * 
+ * Note:
+ * All property handling logic is defined in yapif.ini.
+ * 
+ */
+
+
 #include <android/log.h>
 #include <sys/system_properties.h>
 #include <unistd.h>
@@ -22,64 +35,7 @@ typedef void (*T_Callback)(void *, const char *, const char *, uint32_t);
 
 static T_Callback o_callback = nullptr;
 
-static void modify_callback(void *cookie, const char *name, const char *value, uint32_t serial) {
-
-    if (cookie == nullptr || name == nullptr || value == nullptr || o_callback == nullptr)
-        return;
-
-
-    std::string prop(name);
-    std::string val(value);
-    //only hook ro.board.first_api_level ro.product.first_api_level
-    //ro.vendor.api_level is cacluated as minimal val, so leave it untouched??
-    //or explicitly set with "*.api_level"??
-    //need test on newer devices
-    //https://source.android.com/docs/core/tests/vts/setup11#requiring-min-api-level
-
-    //ID, SECURITY_PATCH etc.. are still in propVals but unused. All things done through raw prop maps.
-
-    if (propVals.count(prop)) {
-        val = propVals[prop];
-    } else {
-        for (const auto &p: propPostfix) {
-            if (prop.ends_with(p.first)) {
-                //if (p.first.starts_with(".") && prop.ends_with(p.first)) {
-                val = p.second;
-                break;
-            }
-        }
-    }
-
-    //always  log changed hooked calls
-    if (std::string_view(value) != val)
-        LOGD("[%s]: %s -> %s", name, value, val.c_str());
-    else if (logLevel >= 2 && !prop.starts_with("cache_")) {
-        LOGD("[%s] == %s", name, value);
-    }
-    return o_callback(cookie, name, val.c_str(), serial);
-}
-
-static void (*o_system_property_read_callback)(const prop_info *, T_Callback, void *);
-
-static void
-my_system_property_read_callback(const prop_info *pi, T_Callback callback, void *cookie) {
-    if (pi == nullptr || callback == nullptr || cookie == nullptr) {
-        return o_system_property_read_callback(pi, callback, cookie);
-    }
-    o_callback = callback;
-    return o_system_property_read_callback(pi, modify_callback, cookie);
-}
-
-static void doHook() {
-    void *handle = DobbySymbolResolver(nullptr, "__system_property_read_callback");
-    if (handle == nullptr) {
-        LOGD("Couldn't find '__system_property_read_callback' handle. Report to @chiteroman");
-        return;
-    }
-    LOGD("Found '__system_property_read_callback' handle at %p", handle);
-    DobbyHook(handle, (dobby_dummy_func_t) my_system_property_read_callback,
-              (dobby_dummy_func_t *) &o_system_property_read_callback);
-}
+static void doHook();
 
 class PlayIntegrityFix : public zygisk::ModuleBase {
 public:
@@ -194,6 +150,8 @@ private:
         //3. java props to raw prop
         //4. preset raw props
         //5. resetprop
+
+        //1. user defined
         for (auto &p: prop.items()) {
             keyName = p.first;
 
@@ -211,17 +169,19 @@ private:
             }
         }
 
+        //use LOG_LEVEL from yapif.ini with a lower priority, 
+        //so user don't need to set it in every prop.
         logLevel = propVals.count("LOG_LEVEL") ? stoi(propVals["LOG_LEVEL"]) :
                    config.get("MAIN", "LOG_LEVEL", 0);
-        if (logLevel >= 1) {
-            //set LOG_LEVEL for java.
-            propVals["LOG_LEVEL"] = std::to_string(logLevel);
-        }
+        //set LOG_LEVEL for java.
+        propVals["LOG_LEVEL"] = std::to_string(logLevel);
+
         LOGD("LOG LEVEL: %d", logLevel);
 
+        //2-5.
         autoFillProp();
 
-        //generate prop from propVals for java
+        //prepare prop for JAVA.
         prop.clear();
         for (auto &p: propVals) {
             if (p.first.find(".") == std::string::npos)
@@ -336,8 +296,67 @@ private:
 
 };
 
+static void modify_callback(void *cookie, const char *name, const char *value, uint32_t serial) {
+
+    if (cookie == nullptr || name == nullptr || value == nullptr || o_callback == nullptr)
+        return;
+
+
+    std::string prop(name);
+    std::string val(value);
+    //only hook ro.board.first_api_level ro.product.first_api_level
+    //ro.vendor.api_level is cacluated as minimal val, so leave it untouched??
+    //or explicitly set with "*.api_level"??
+    //need test on newer devices
+    //https://source.android.com/docs/core/tests/vts/setup11#requiring-min-api-level
+
+    if (propVals.count(prop)) {
+        val = propVals[prop];
+    } else {
+        for (const auto &p: propPostfix) {
+            if (prop.ends_with(p.first)) {
+                //if (p.first.starts_with(".") && prop.ends_with(p.first)) {
+                val = p.second;
+                break;
+            }
+        }
+    }
+
+    //always  log changed hooked calls
+    if (std::string_view(value) != val)
+        LOGD("[%s]: %s -> %s", name, value, val.c_str());
+    else if (logLevel >= 2 && !prop.starts_with("cache_")) {
+        LOGD("[%s] == %s", name, value);
+    }
+    return o_callback(cookie, name, val.c_str(), serial);
+}
+
+static void (*o_system_property_read_callback)(const prop_info *, T_Callback, void *);
+
+static void
+my_system_property_read_callback(const prop_info *pi, T_Callback callback, void *cookie) {
+    if (pi == nullptr || callback == nullptr || cookie == nullptr) {
+        return o_system_property_read_callback(pi, callback, cookie);
+    }
+    o_callback = callback;
+    return o_system_property_read_callback(pi, modify_callback, cookie);
+}
+
+static void doHook() {
+    void *handle = DobbySymbolResolver(nullptr, "__system_property_read_callback");
+    if (handle == nullptr) {
+        LOGD("Couldn't find '__system_property_read_callback' handle. Report to @chiteroman");
+        return;
+    }
+    LOGD("Found '__system_property_read_callback' handle at %p", handle);
+    DobbyHook(handle, (dobby_dummy_func_t) my_system_property_read_callback,
+              (dobby_dummy_func_t *) &o_system_property_read_callback);
+}
+
+
+// load evertying inside a single vector<char> to r/w only once.
 static void companion(int fd) {
-    // |--longx3--|--config--|--prop--|--classes.dex--|
+    // |--long long long--|--config--|--prop--|--classes.dex--|
     std::vector<char> data(sizeof(long) * 3, 0);
     const std::string BASE = PIF_FILE_BASE;
 
@@ -350,7 +369,7 @@ static void companion(int fd) {
     auto propFiles = conf.get("MAIN", "PROP_FILES",
                               {"custom.pif.json", "custom.pif.prop", "pif.json", "pif.prop"});
     conf.clear();
-    //auto propFiles = {"x.pif.json", "x.pif.prop", "custom.pif.json", "custom.pif.prop", "pif.json", "pif.prop"};
+    //auto propFiles = {"custom.pif.json", "custom.pif.prop", "pif.json", "pif.prop"};
 
     //load pif.prop
     std::string propPath;

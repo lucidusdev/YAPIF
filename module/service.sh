@@ -50,7 +50,7 @@ done
 
 $SYSPROP ro.boot.flash.locked 1
 
-# RESETPROP=1 get these set INSIDE YAPIF. Or set it here...
+# use RESETPROP=1 to have these set INSIDE YAPIF, otherwise, set it here...
 if ! grep -Fxq "RESETPROP=1" $MODDIR/yapif.ini; then
     resetprop_if_diff ro.boot.vbmeta.device_state locked
     resetprop_if_diff vendor.boot.verifiedbootstate green
