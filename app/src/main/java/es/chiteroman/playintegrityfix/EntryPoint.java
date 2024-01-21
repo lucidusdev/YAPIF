@@ -1,6 +1,6 @@
 /***
  * CREDIT
- * Most of the code below is from PlayIntegrityFork repo(https://github.com/osm0sis/PlayIntegrityFork)
+ * Most of the code below is from PlayIntegrityFork repo(https://github.com/osm0sis/PlayIntegrityFork) by osm0sis.
  * With some minor tweaks.
  * 
  * Note:

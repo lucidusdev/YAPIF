@@ -64,6 +64,11 @@ android {
     }
 }
 
+dependencies {
+    implementation("dev.rikka.ndk.thirdparty:cxx:1.2.0")
+
+}
+
 tasks.register("updateModuleProp") {
     doLast {
         val versionName = project.android.defaultConfig.versionName

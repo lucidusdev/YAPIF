@@ -3,6 +3,7 @@ if [ "$API" -lt 26 ]; then
     abort "- !!! You can't use this module on Android < 8.0"
 fi
 
+
 # safetynet-fix module is obsolete and it's incompatible with PIF.
 if [ -d /data/adb/modules/safetynet-fix ]; then
 	rm -rf /data/adb/modules/safetynet-fix
@@ -21,22 +22,10 @@ for i in $M; do
 done
 
 
-# Remove various 3rd party apps, these will restore upon removal YAPIF.
-APPS="/product/app/XiaomiEUInject /system/app/XInjectModule /system/app/EliteDevelopmentModule"
-
-for i in $APPS; do
-	if [ -d $i ]; then
-		app=$(echo $i | cut -d '/' -f4)
-		directory="$MODPATH$i"
-		[ -d "$directory" ] || mkdir -p "$directory"
-		touch "$directory/.replace"
-		ui_print "- Remove $app at $i"
-	fi
-done
-
-# Keep old config files
 PIFBASE=/data/adb/modules/yapif/
-F=$(cat $PIFBASE/yapif.ini | grep PROP_FILES | cut -d '=' -f2 | sed 's/,/ /g')
+# Keep old config files, use absolute path here for established installation.
+F=$(cat $PIFBASE/yapif.ini | grep ^PROP_FILES | cut -d '=' -f2)
+IFS=", "
 
 for i in $F yapif.ini; do
 	if [ -f $PIFBASE/$i ]; then
@@ -45,8 +34,15 @@ for i in $F yapif.ini; do
 	fi
 done
 
+#keep only $ABI.so
+for i in $MODPATH/zygisk/*.so; do
+    if [[ ! $(basename $i) == $ABI.so ]]; then
+        rm -f $i
+    fi
+done
 
-ui_print "- Prepare system_properties"
-mv -f $MODPATH/bin/$ABI/system_properties $MODPATH/
+ui_print " "
+ui_print "Prepare sysprop"
+mv -f $MODPATH/bin/$ABI/sysprop $MODPATH/
 rm -rf $MODPATH/bin
-set_perm $MODPATH/system_properties root root 755
+set_perm $MODPATH/sysprop root root 755

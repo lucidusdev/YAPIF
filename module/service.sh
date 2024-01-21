@@ -2,7 +2,7 @@
 
 
 MODDIR=${0%/*}
-SYSPROP=$MODDIR/system_properties
+SYSPROP=$MODDIR/sysprop
 if ! grep -Fxq "SYSPROP=1" $MODDIR/yapif.ini; then 
 	SYSPROP=resetprop
 fi
@@ -50,8 +50,8 @@ done
 
 $SYSPROP ro.boot.flash.locked 1
 
-# use RESETPROP=1 to have these set INSIDE YAPIF, otherwise, set it here...
-if ! grep -Fxq "RESETPROP=1" $MODDIR/yapif.ini; then
+# use SPOOFPROP=1 to have these set INSIDE YAPIF, otherwise, set it here...
+if ! grep -Fxq "SPOOFPROP=1" $MODDIR/yapif.ini; then
     resetprop_if_diff ro.boot.vbmeta.device_state locked
     resetprop_if_diff vendor.boot.verifiedbootstate green
     resetprop_if_diff ro.boot.verifiedbootstate green

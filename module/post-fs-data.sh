@@ -5,7 +5,7 @@ fi
 
 # Conditional early sensitive properties
 MODDIR=${0%/*}
-SYSPROP=$MODDIR/system_properties
+SYSPROP=$MODDIR/sysprop
 if ! grep -Fxq "SYSPROP=1" $MODDIR/yapif.ini; then 
 	SYSPROP=resetprop
 fi
@@ -26,7 +26,7 @@ resetprop_if_match() {
     [[ "$(resetprop $NAME)" == *"$CONTAINS"* ]] && $SYSPROP $NAME $VALUE
 }
 
-if ! grep -Fxq "RESETPROP=1" $MODDIR/yapif.ini; then
+if ! grep -Fxq "SPOOFPROP=1" $MODDIR/yapif.ini; then
 	# RootBeer, Microsoft
 	resetprop_if_diff ro.build.tags release-keys
 
@@ -44,3 +44,17 @@ if ! grep -Fxq "RESETPROP=1" $MODDIR/yapif.ini; then
 	resetprop_if_diff ro.debuggable 0
 	resetprop_if_diff ro.secure 1
 fi
+
+
+# Remove various 3rd party apps, these will restore if YAPIF removed.
+APPS=$(cat $MODDIR/yapif.ini | grep ^HIDE_APPS | cut -d '=' -f2)
+IFS=", "
+
+for i in $APPS; do
+	if [ -d $i ]; then
+		app=$(basename $i)
+		hide="$MODDIR/$i/"
+		[ -d "$hide" ] || mkdir -p "$hide"
+		touch "$hide/.replace"
+	fi
+done
